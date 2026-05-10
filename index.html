@@ -1174,6 +1174,7 @@ async function runCoach(p) {
 
   try {
     const r = await callClaude(PROMPTS.coach({ ...p, l1: S.layers[1], l2: S.layers[2], l3: S.layers[3], l4: S.layers[4], l5: S.layers[5], score: S.score?.overall || '?' }), 900);
+    S.coachText = r.text;
     document.getElementById('coach-card').innerHTML = `
       <div class="coach-head">
         <div class="coach-av">🎓</div>
@@ -1506,13 +1507,61 @@ function exportJSON() {
 }
 
 function exportMarkdown() {
-  let md = `# DebateIQ Report\n\n**Topic:** ${S.topic}\n**Position:** ${S.position}\n**Persona:** ${S.persona}\n\n---\n\n`;
+  const cost = (S.tele.in * 0.000003 + S.tele.out * 0.000015).toFixed(4);
+  const date = new Date().toLocaleString();
+
+  let md = `# DebateIQ Debate Report\n\n`;
+  md += `**Date:** ${date}\n`;
+  md += `**Topic:** ${S.topic}\n`;
+  md += `**Position:** ${S.position}\n`;
+  md += `**Persona:** ${S.persona}\n`;
+  md += `**Tone:** ${S.tone}\n`;
+  md += `**Source:** ${S.source}\n`;
+  md += `**Model:** ${S.model}\n\n`;
+  md += `---\n\n`;
+
+  md += `## Telemetry\n\n`;
+  md += `| Metric | Value |\n| --- | --- |\n`;
+  md += `| Total input tokens | ${S.tele.in.toLocaleString()} |\n`;
+  md += `| Total output tokens | ${S.tele.out.toLocaleString()} |\n`;
+  md += `| Total tokens | ${S.tele.tot.toLocaleString()} |\n`;
+  md += `| Average latency | ${Math.round(S.tele.latMs).toLocaleString()}ms |\n`;
+  md += `| Estimated cost | $${cost} |\n\n`;
+
+  md += `### Per-layer token breakdown\n\n`;
+  md += `| Layer | Input | Output | Total |\n| --- | --- | --- | --- |\n`;
+  for (let n = 1; n <= 5; n++) {
+    const lt = S.layerTokens[n] || { in: 0, out: 0 };
+    md += `| Layer ${n} — ${LAYER_META[n-1].label} | ${lt.in.toLocaleString()} | ${lt.out.toLocaleString()} | ${(lt.in + lt.out).toLocaleString()} |\n`;
+  }
+  md += `\n---\n\n`;
+
   for (let n = 1; n <= 5; n++) {
     md += `## Layer ${n}: ${LAYER_META[n-1].label}\n\n${S.layers[n] || ''}\n\n---\n\n`;
   }
-  if (S.score) md += `## Score Card\nOverall: ${S.score.overall}/100\n${S.score.verdict}\n`;
+
+  if (S.score) {
+    md += `## Score Card\n\n`;
+    md += `| Dimension | Score /100 |\n| --- | --- |\n`;
+    md += `| Argument Strength | ${S.score.strength ?? '—'} |\n`;
+    md += `| Evidence Quality | ${S.score.evidence ?? '—'} |\n`;
+    md += `| Logical Coherence | ${S.score.logic ?? '—'} |\n`;
+    md += `| Persuasiveness | ${S.score.persuasion ?? '—'} |\n`;
+    md += `| **Overall** | **${S.score.overall}** |\n\n`;
+    md += `**Verdict:** ${S.score.verdict || ''}\n\n`;
+    if (S.score.recommendation) md += `**Recommendation:** ${S.score.recommendation}\n\n`;
+    md += `---\n\n`;
+  }
+
+  if (S.coachText) {
+    md += `## Coach Feedback\n\n${S.coachText}\n\n---\n\n`;
+  }
+
   const blob = new Blob([md], { type: 'text/markdown' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `pizzaiq-${Date.now()}.md`; a.click();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `debateiq-${Date.now()}.md`;
+  a.click();
 }
 
 function copyAll() {
