@@ -482,6 +482,7 @@ select option{background:#0d1f3c;}
     <div class="cf">
       <div class="cfl">Response Length</div>
       <select id="wc-sel">
+        <option value="50-100">Very Short (50-100 words)</option>
         <option value="150-200">Short (150-200 words)</option>
         <option value="200-250" selected>Medium (200-250 words)</option>
         <option value="280-330">Long (280-330 words)</option>
@@ -490,8 +491,8 @@ select option{background:#0d1f3c;}
     <div class="cf">
       <div class="cfl">AI Model</div>
       <select id="model-sel">
-        <option value="claude-sonnet-4-6" selected>Sonnet 4.6 (Best)</option>
-        <option value="claude-haiku-4-5-20251001">Haiku 4.5 (Faster)</option>
+        <option value="claude-sonnet-4-6">Sonnet 4.6 (Best)</option>
+        <option value="claude-haiku-4-5-20251001" selected>Haiku 4.5 (Faster)</option>
       </select>
     </div>
   </div>
@@ -694,7 +695,7 @@ const S = {
   tone: 'passionate and authoritative',
   source: 'peer-reviewed academic research and scholarly journals',
   wordCount: '200-250',
-  model: 'claude-sonnet-4-6',
+  model: 'claude-haiku-4-5-20251001',
   layers: {},
   layerTokens: {},
   layerLatency: {},
@@ -1565,7 +1566,7 @@ function exportMarkdown() {
 }
 
 function copyAll() {
-  let txt = `PIZZAIQ DEBATE — ${S.topic}\nPosition: ${S.position}\n\n`;
+  let txt = `DebateIQ — ${S.topic}\nPosition: ${S.position}\n\n`;
   for (let n = 1; n <= 5; n++) txt += `LAYER ${n}: ${LAYER_META[n-1].label.toUpperCase()}\n${S.layers[n] || ''}\n\n`;
   navigator.clipboard.writeText(txt).then(() => showToast('📋 All layers copied!', 'ok'));
 }
