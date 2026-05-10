@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DebateIQ — AI Debate Strategist</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020b18;--s1:#071428;--s2:#0d1f3c;--s3:#132848;
+  --bd:#1a3a5c;--bd2:#2a5080;
+  --tx:#e8f4ff;--mu:#6b9cc5;--di:#3d6080;
+  --p:#0ea5e9;--p2:#38bdf8;--acc:#6366f1;
+  --g:#10b981;--g2:#34d399;
+  --l1:#0ea5e9;--l2:#818cf8;--l3:#f43f5e;--l4:#f59e0b;--l5:#10b981;
+  --warn:#f59e0b;--err:#f43f5e;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden;}
+canvas#particles{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.6;}
+.wrap{position:relative;z-index:1;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;background:rgba(2,11,24,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:0 1.2rem;}
+.ni{max-width:1100px;margin:0 auto;height:54px;display:flex;align-items:center;gap:10px;}
+.logo{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;text-decoration:none;color:var(--tx);}
+.li{width:32px;height:32px;background:linear-gradient(135deg,var(--p),var(--acc));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.logo span{background:linear-gradient(135deg,var(--p2),#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ndot{width:7px;height:7px;border-radius:50%;background:var(--g2);box-shadow:0 0 6px var(--g2);animation:blink 2s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.nr{margin-left:auto;display:flex;gap:6px;align-items:center;}
+.nbtn{background:transparent;border:1px solid var(--bd);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--mu);cursor:pointer;font-family:'Outfit',sans-serif;font-weight:500;transition:all .2s;white-space:nowrap;}
+.nbtn:hover{border-color:var(--p);color:var(--p2);}
+.nbtnp{background:linear-gradient(135deg,var(--p),var(--acc));border:none;color:#fff;font-weight:700;}
+.nbtnp:hover{opacity:.88;color:#fff;}
+
+/* PAGE */
+.page{max-width:1100px;margin:0 auto;padding:1.5rem 1.2rem 6rem;}
+
+/* HERO */
+.hero{text-align:center;padding:2rem 0 1.5rem;}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;line-height:1.1;margin-bottom:.6rem;}
+.hero h1 em{font-style:italic;background:linear-gradient(135deg,var(--p2),var(--acc),#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{font-size:13.5px;color:var(--mu);max-width:500px;margin:0 auto 1.6rem;line-height:1.8;}
+
+/* LOGICAL FLOW BANNER */
+.flow-banner{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:2rem;flex-wrap:wrap;}
+.fb-step{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 18px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.15);border-radius:12px;}
+.fb-step:first-child{border-radius:12px 0 0 12px;}
+.fb-step:last-child{border-radius:0 12px 12px 0;}
+.fb-arrow{color:var(--p);font-size:18px;padding:0 2px;opacity:.5;}
+.fb-icon{font-size:20px;}
+.fb-label{font-size:9px;font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--p2);font-weight:600;}
+.fb-sub{font-size:9px;color:var(--di);}
+
+/* SECTION LABEL */
+.sl{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--di);font-family:'JetBrains Mono',monospace;margin-bottom:.8rem;margin-top:1.8rem;display:flex;align-items:center;gap:8px;}
+.sl::after{content:'';flex:1;height:1px;background:var(--bd);}
+.stag{background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:2px 7px;font-size:10px;color:var(--p2);flex-shrink:0;}
+
+/* TOPIC CARDS */
+.topics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:1rem;}
+.topic{background:var(--s1);border:2px solid var(--bd);border-radius:14px;padding:14px 16px;cursor:pointer;text-align:left;transition:all .2s;font-family:'Outfit',sans-serif;color:var(--tx);position:relative;}
+.topic:hover{border-color:var(--bd2);transform:translateY(-1px);}
+.topic.sel{border-color:var(--p);background:rgba(14,165,233,.06);}
+.te{font-size:22px;display:block;margin-bottom:6px;}
+.tt{font-size:12.5px;font-weight:700;margin-bottom:3px;line-height:1.3;}
+.tsub{font-size:10px;color:var(--mu);line-height:1.5;}
+.tick{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;background:var(--p);color:#fff;font-size:9px;display:none;align-items:center;justify-content:center;}
+.topic.sel .tick{display:flex;}
+
+/* POSITION TOGGLE */
+.pos-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;}
+.pos-btn{background:var(--s1);border:2px solid var(--bd);border-radius:12px;padding:12px 16px;cursor:pointer;text-align:left;transition:all .2s;font-family:'Outfit',sans-serif;color:var(--tx);}
+.pos-btn:hover{border-color:var(--bd2);}
+.pos-btn.sel{border-color:var(--p);background:rgba(14,165,233,.07);}
+.pos-icon{font-size:18px;display:block;margin-bottom:5px;}
+.pos-label{font-size:12px;font-weight:700;line-height:1.4;}
+.pos-sub{font-size:10px;color:var(--mu);margin-top:2px;}
+.custom-pos{display:flex;gap:8px;margin-bottom:.8rem;}
+.cpin{flex:1;background:var(--s1);border:2px solid var(--bd);border-radius:10px;padding:10px 14px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.cpin:focus{border-color:var(--p);}
+.cpin::placeholder{color:var(--di);}
+.cpbtn{background:linear-gradient(135deg,var(--p),var(--acc));border:none;border-radius:10px;padding:10px 16px;color:#fff;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+
+/* CONFIG GRID */
+.cfg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;}
+@media(max-width:600px){.cfg{grid-template-columns:1fr 1fr;}}
+.cf{display:flex;flex-direction:column;gap:6px;}
+.cfl{font-size:10px;color:var(--mu);font-family:'JetBrains Mono',monospace;}
+select,.inp{background:var(--s1);border:2px solid var(--bd);border-radius:10px;padding:10px 14px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:13px;outline:none;width:100%;transition:border-color .2s;}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%236b9cc5' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px;cursor:pointer;}
+select:focus,.inp:focus{border-color:var(--p);}
+select option{background:#0d1f3c;}
+.inp::placeholder{color:var(--di);}
+
+/* TONES */
+.tones{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.tone-chip{background:var(--s1);border:2px solid var(--bd);border-radius:999px;padding:5px 13px;font-size:11px;font-weight:500;color:var(--mu);cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
+.tone-chip:hover{border-color:var(--bd2);color:var(--tx);}
+.tone-chip.sel{border-color:var(--p2);color:var(--p2);background:rgba(56,189,248,.1);}
+
+/* ACCORDION */
+.acc-wrap{background:var(--s1);border:2px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:.8rem;}
+.acc-hd{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .2s;}
+.acc-hd:hover{background:rgba(14,165,233,.04);}
+.acc-hd.open{border-bottom:1px solid var(--bd);}
+.acc-hl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
+.acc-badge{font-size:10px;padding:2px 9px;border-radius:999px;font-family:'JetBrains Mono',monospace;}
+.badge-ok{background:rgba(16,185,129,.1);color:var(--g2);border:1px solid rgba(16,185,129,.25);}
+.badge-warn{background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.25);}
+.badge-blue{background:rgba(14,165,233,.1);color:var(--p2);border:1px solid rgba(14,165,233,.25);}
+.acc-ch{color:var(--di);font-size:12px;transition:transform .25s;}
+.acc-ch.open{transform:rotate(180deg);}
+.acc-bd{padding:14px 16px;display:none;}
+.acc-bd.open{display:block;}
+
+/* SOURCE GRID */
+.src-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;}
+@media(max-width:600px){.src-grid{grid-template-columns:1fr 1fr;}}
+.src-btn{background:var(--s2);border:2px solid var(--bd);border-radius:10px;padding:9px 11px;cursor:pointer;text-align:left;color:var(--tx);font-family:'Outfit',sans-serif;transition:all .2s;}
+.src-btn:hover{border-color:var(--bd2);}
+.src-btn.sel{border-color:var(--g);background:rgba(16,185,129,.07);}
+.si{font-size:14px;margin-bottom:2px;}
+.sn{font-size:11px;font-weight:700;margin-bottom:1px;}
+.sd{font-size:9px;color:var(--mu);}
+
+/* KEY INPUT */
+.key-row{display:flex;gap:8px;margin-bottom:8px;}
+.key-in{flex:1;background:var(--s2);border:2px solid var(--bd);border-radius:9px;padding:9px 13px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;}
+.key-in:focus{border-color:var(--p);}
+.key-in::placeholder{color:var(--di);letter-spacing:0;}
+.key-btn{background:linear-gradient(135deg,var(--p),var(--acc));border:none;border-radius:9px;padding:9px 16px;color:#fff;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.key-btn:hover{opacity:.88;}
+.key-note{font-size:11px;color:var(--di);line-height:1.7;}
+.key-note a{color:var(--p2);text-decoration:none;}
+
+/* RUN BUTTON */
+.run-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--p),var(--acc) 50%,#7c3aed);background-size:200%;border:none;border-radius:14px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:#fff;letter-spacing:.02em;transition:all .35s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:1.4rem;box-shadow:0 0 30px rgba(14,165,233,.15);}
+.run-btn:hover:not(:disabled){background-position:right center;transform:translateY(-2px);box-shadow:0 12px 40px rgba(14,165,233,.3);}
+.run-btn:active:not(:disabled){transform:translateY(0);}
+.run-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.run-spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PROGRESS BAR */
+.prog-wrap{height:4px;background:var(--bd);border-radius:999px;overflow:hidden;margin-bottom:1.2rem;display:none;}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--p),var(--acc),var(--p));background-size:200%;border-radius:999px;transition:width .5s ease;animation:shimmer 2s linear infinite;}
+@keyframes shimmer{0%{background-position:0% 0%}100%{background-position:200% 0%}}
+
+/* TELEMETRY */
+.tele{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:.8rem;}
+@media(max-width:700px){.tele{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:450px){.tele{grid-template-columns:1fr 1fr;}}
+.tc{background:var(--s1);border:2px solid var(--bd);border-radius:12px;padding:12px 13px;transition:all .4s;}
+.tc.lit{border-color:var(--p);box-shadow:0 0 12px rgba(14,165,233,.15);}
+.tlbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--di);font-family:'JetBrains Mono',monospace;margin-bottom:6px;}
+.tval{font-size:19px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--p2);transition:all .3s;}
+.tunit{font-size:10px;color:var(--di);margin-top:2px;}
+.cost-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:999px;padding:4px 14px;font-size:11px;color:var(--warn);font-family:'JetBrains Mono',monospace;margin-bottom:1.2rem;}
+
+/* PIPELINE */
+.pipeline{display:flex;flex-direction:column;gap:0;margin-bottom:1.5rem;}
+
+/* FLOW CONNECTOR */
+.flow-conn{display:flex;flex-direction:column;align-items:center;height:36px;position:relative;}
+.flow-line{width:2px;flex:1;position:relative;overflow:hidden;background:var(--bd);border-radius:2px;}
+.flow-line::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:100%;background:linear-gradient(180deg,transparent,var(--p),transparent);animation:flowPulse 1.5s linear infinite;opacity:0;transition:opacity .4s;}
+.flow-line.active::after{opacity:1;}
+.flow-dot{width:10px;height:10px;border-radius:50%;background:var(--bd);border:2px solid var(--bg);transition:all .4s;box-shadow:0 0 0 0 transparent;}
+.flow-dot.active{background:var(--p);box-shadow:0 0 10px rgba(14,165,233,.6);}
+@keyframes flowPulse{0%{top:-100%}100%{top:100%}}
+
+/* LAYER CARDS */
+.lcard{background:var(--s1);border:2px solid var(--bd);border-radius:16px;overflow:hidden;transition:border-color .4s,box-shadow .4s;animation:fadeUp .35s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.lcard.done{border-color:var(--lc,var(--p));box-shadow:0 0 20px rgba(14,165,233,.08);}
+.lcard.active{border-color:var(--lc,var(--p));box-shadow:0 0 30px rgba(14,165,233,.15);}
+.lhdr{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--bd);background:rgba(255,255,255,.012);}
+.lnum{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;border:2px solid;flex-shrink:0;}
+.lmeta{flex:1;min-width:0;}
+.ltitle{font-size:13.5px;font-weight:700;}
+.lsub{font-size:10px;color:var(--mu);margin-top:2px;}
+.lq{font-size:10px;color:var(--di);font-style:italic;margin-top:2px;}
+.lstat{margin-left:auto;font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;padding:4px 10px;border-radius:999px;border:1px solid;white-space:nowrap;flex-shrink:0;}
+.lbody{padding:18px;min-height:56px;}
+.ltext{font-size:13px;line-height:1.9;color:var(--tx);}
+.lspin{display:flex;gap:5px;align-items:center;padding:6px 0;}
+.ld{width:7px;height:7px;border-radius:50%;background:var(--lc,var(--p));animation:bounce 1s infinite;}
+.ld:nth-child(2){animation-delay:.18s;}.ld:nth-child(3){animation-delay:.36s;}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.lfoot{padding:8px 18px 13px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--bd);}
+.ltok{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--di);display:flex;align-items:center;gap:3px;}
+.ltok b{color:var(--lc,var(--p));font-weight:600;}
+.lbtn{background:transparent;border:1px solid var(--bd);border-radius:7px;padding:4px 10px;font-size:10px;color:var(--mu);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.lbtn:hover{border-color:var(--p);color:var(--p2);}
+.lbtn.play{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.2);color:var(--p2);}
+.lbtn.playing{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.2);color:var(--err);}
+.llatency{font-size:10px;color:var(--di);font-family:'JetBrains Mono',monospace;margin-left:auto;}
+
+/* SCORE CARD */
+.score-card{background:var(--s1);border:2px solid var(--bd);border-radius:16px;overflow:hidden;margin-bottom:1.5rem;animation:fadeUp .4s ease both;}
+.sc-head{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.sc-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.sc-total{font-size:36px;font-weight:800;font-family:'JetBrains Mono',monospace;}
+.sc-total.ex{color:var(--g2);}.sc-total.gd{color:var(--p2);}.sc-total.ok{color:var(--warn);}.sc-total.wk{color:var(--err);}
+.sc-body{padding:18px 20px;}
+.sc-row{display:flex;align-items:center;gap:12px;margin-bottom:11px;}
+.sc-lbl{font-size:12px;color:var(--mu);width:120px;flex-shrink:0;}
+.sc-bar-wrap{flex:1;height:7px;background:var(--s3);border-radius:999px;overflow:hidden;}
+.sc-bar{height:100%;border-radius:999px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1);width:0%;}
+.sc-score{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;width:36px;text-align:right;flex-shrink:0;}
+.sc-verdict{margin-top:14px;padding-top:14px;border-top:1px solid var(--bd);font-size:13px;color:var(--mu);line-height:1.75;}
+.sc-rec{margin-top:8px;font-size:12px;color:var(--p2);font-style:italic;}
+
+/* COACH CARD */
+.coach-card{background:linear-gradient(135deg,rgba(14,165,233,.06),rgba(99,102,241,.04));border:2px solid rgba(14,165,233,.2);border-radius:16px;overflow:hidden;margin-bottom:1.5rem;animation:fadeUp .4s ease both;}
+.coach-head{padding:15px 20px;border-bottom:1px solid rgba(14,165,233,.12);display:flex;align-items:center;gap:12px;}
+.coach-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--acc));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.coach-title{font-size:14px;font-weight:700;color:var(--p2);}
+.coach-sub{font-size:11px;color:var(--mu);margin-top:1px;}
+.coach-body{padding:18px 20px;}
+.coach-text{font-size:13px;line-height:1.9;color:var(--tx);}
+.coach-text strong{color:var(--p2);}
+.coach-text h3,.coach-text h4{color:var(--p2);margin:12px 0 6px;font-size:13px;}
+
+/* INSIGHTS GRID */
+.ins-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem;}
+@media(max-width:700px){.ins-grid{grid-template-columns:1fr 1fr;}}
+.ins-c{background:var(--s1);border:2px solid var(--bd);border-radius:13px;padding:15px;position:relative;overflow:hidden;}
+.ins-c::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ic,var(--p));}
+.ins-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--di);font-family:'JetBrains Mono',monospace;margin-bottom:8px;}
+.ins-val{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--ic,var(--p));}
+.ins-desc{font-size:11px;color:var(--mu);margin-top:4px;}
+
+/* CHART */
+.chart-card{background:var(--s1);border:2px solid var(--bd);border-radius:13px;padding:18px;margin-bottom:1rem;}
+.chart-lbl{font-size:10px;color:var(--mu);font-family:'JetBrains Mono',monospace;margin-bottom:14px;}
+.chart-bars{display:flex;align-items:flex-end;gap:10px;height:110px;}
+.bwrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.bar{width:100%;border-radius:5px 5px 0 0;min-height:4px;transition:height .7s cubic-bezier(.34,1.56,.64,1);}
+.bval{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--tx);}
+.blbl{font-size:9px;color:var(--di);font-family:'JetBrains Mono',monospace;}
+
+/* EXPORT BAR */
+.exp-bar{display:flex;gap:8px;flex-wrap:wrap;padding:13px 16px;background:var(--s1);border:2px solid var(--bd);border-radius:13px;align-items:center;margin-bottom:1.5rem;}
+.exp-lbl{font-size:11px;color:var(--mu);font-family:'JetBrains Mono',monospace;margin-right:4px;}
+.exp-btn{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 13px;font-size:11px;font-weight:600;color:var(--mu);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.exp-btn:hover{border-color:var(--p);color:var(--p2);}
+
+/* LIVE DEBATE */
+.live-panel{background:var(--s1);border:2px solid var(--bd);border-radius:16px;overflow:hidden;margin-bottom:1.5rem;}
+.live-head{padding:14px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.live-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.live-badge{font-size:10px;padding:3px 10px;border-radius:999px;font-family:'JetBrains Mono',monospace;background:rgba(244,63,94,.1);color:var(--err);border:1px solid rgba(244,63,94,.25);}
+.live-badge.on{background:rgba(16,185,129,.1);color:var(--g2);border-color:rgba(16,185,129,.25);animation:blink .8s infinite;}
+.live-body{padding:18px 20px;}
+.live-transcript{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:14px;max-height:320px;overflow-y:auto;margin-bottom:14px;min-height:100px;}
+.msg{display:flex;gap:10px;margin-bottom:12px;animation:fadeUp .25s ease both;}
+.msg:last-child{margin-bottom:0;}
+.msg-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.msg-av.human{background:linear-gradient(135deg,var(--p),var(--acc));}
+.msg-av.ai{background:linear-gradient(135deg,#f43f5e,#f59e0b);}
+.msg-body{flex:1;}
+.msg-name{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--di);margin-bottom:4px;font-weight:600;}
+.msg-text{font-size:13px;line-height:1.7;color:var(--tx);}
+.live-ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.live-btn{padding:11px 20px;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .2s;display:flex;align-items:center;gap:7px;}
+.lbstart{background:linear-gradient(135deg,var(--p),var(--acc));color:#fff;}
+.lbstart:hover{opacity:.88;transform:translateY(-1px);}
+.lbstart:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.lbend{background:rgba(244,63,94,.1);border:2px solid rgba(244,63,94,.3);color:var(--err);}
+.lbend:hover{background:rgba(244,63,94,.2);}
+.live-status{font-size:12px;color:var(--mu);font-family:'JetBrains Mono',monospace;}
+.wave{display:flex;align-items:center;gap:3px;height:24px;}
+.wave-bar{width:3px;border-radius:3px;background:var(--err);animation:wave .6s ease-in-out infinite;}
+.wave-bar:nth-child(2){animation-delay:.1s;height:14px;}
+.wave-bar:nth-child(3){animation-delay:.2s;height:20px;}
+.wave-bar:nth-child(4){animation-delay:.15s;height:10px;}
+.wave-bar:nth-child(5){animation-delay:.05s;height:16px;}
+@keyframes wave{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.2)}}
+.live-result{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-top:14px;display:none;}
+.lr-head{font-size:13px;font-weight:700;color:var(--p2);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.lr-scores{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.lrs{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:11px 13px;}
+.lrs-lbl{font-size:10px;color:var(--mu);margin-bottom:5px;}
+.lrs-val{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--p2);}
+.lr-text{font-size:12px;color:var(--mu);line-height:1.7;}
+
+/* HISTORY */
+.hist-panel{background:var(--s1);border:2px solid var(--bd);border-radius:16px;overflow:hidden;margin-bottom:1.5rem;}
+.hist-head{padding:13px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.hist-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.hist-badge{font-size:10px;padding:2px 9px;border-radius:999px;background:rgba(14,165,233,.1);color:var(--p2);border:1px solid rgba(14,165,233,.2);font-family:'JetBrains Mono',monospace;}
+.hist-list{max-height:300px;overflow-y:auto;}
+.hist-item{padding:12px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .2s;}
+.hist-item:last-child{border-bottom:none;}
+.hist-item:hover{background:rgba(14,165,233,.04);}
+.hi-em{font-size:18px;flex-shrink:0;}
+.hi-info{flex:1;min-width:0;}
+.hi-topic{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hi-meta{font-size:10px;color:var(--di);margin-top:2px;}
+.hi-score{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--p2);flex-shrink:0;}
+.hi-del{background:transparent;border:none;color:var(--di);cursor:pointer;font-size:14px;padding:4px;border-radius:5px;transition:color .2s;}
+.hi-del:hover{color:var(--err);}
+.hist-empty{padding:2rem;text-align:center;color:var(--di);font-size:13px;}
+
+/* PLAYER BAR */
+.player-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(2,11,24,.96);backdrop-filter:blur(20px);border-top:1px solid rgba(14,165,233,.25);padding:9px 1.2rem;display:none;align-items:center;gap:12px;transition:all .3s;}
+.player-bar.show{display:flex;}
+.pb-label{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--p2);font-weight:600;flex-shrink:0;}
+.pb-info{flex:1;min-width:0;}
+.pb-layer{font-size:9px;color:var(--p2);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;}
+.pb-text{font-size:11px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pb-prog{height:3px;background:var(--bd);border-radius:999px;overflow:hidden;margin-top:4px;}
+.pb-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--p),var(--acc));border-radius:999px;transition:width .3s;}
+.pb-stop{background:transparent;border:1px solid rgba(244,63,94,.3);color:var(--err);border-radius:7px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0;}
+.pb-stop:hover{background:rgba(244,63,94,.1);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(10px);}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--s1);border:2px solid var(--bd);border-radius:20px;max-width:440px;width:100%;overflow:hidden;}
+.modal-top{background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(99,102,241,.05));padding:24px 28px 18px;border-bottom:1px solid var(--bd);}
+.modal-top h2{font-size:1.2rem;font-weight:800;margin-bottom:4px;}
+.modal-top p{font-size:12px;color:var(--mu);}
+.modal-body{padding:20px 28px;}
+.modal-close{float:right;background:transparent;border:none;color:var(--mu);font-size:20px;cursor:pointer;margin-top:-2px;}
+
+/* TOAST */
+.toast{position:fixed;top:70px;right:1.2rem;z-index:600;background:var(--s1);border:2px solid var(--bd);border-radius:12px;padding:11px 16px;font-size:13px;font-weight:500;display:none;align-items:center;gap:8px;animation:fadeUp .25s ease;max-width:320px;box-shadow:0 10px 40px rgba(0,0,0,.4);}
+.toast.show{display:flex;}
+.toast.ok{border-color:var(--g);color:var(--g2);}
+.toast.err{border-color:var(--err);color:var(--err);}
+.toast.info{border-color:var(--p);color:var(--p2);}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:3.5rem 2rem;color:var(--mu);}
+.empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.35;}
+.empty-title{font-size:16px;font-weight:600;margin-bottom:.4rem;}
+.empty-sub{font-size:13px;color:var(--di);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--s2);}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--p);}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="wrap">
+
+<!-- NAV -->
+<nav>
+  <div class="ni">
+    <a class="logo" href="#">
+      <div class="li">⚡</div>
+      <span>DebateIQ</span>
+    </a>
+    <div class="ndot"></div>
+    <div class="nr">
+      <button class="nbtn" onclick="showSection('live')">⚡ Live Debate</button>
+      <button class="nbtn" onclick="showSection('history')">📋 History</button>
+      <button class="nbtn nbtnp" onclick="showSection('live')">🎤 Start Debate</button>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>AI Debate Strategist<br><em>Any Topic. Any Side.</em></h1>
+    <p>5-layer AI reasoning that thinks deeper at every step — argues any topic, challenges itself, and delivers a verdict. Powered by Claude.</p>
+    <div class="flow-banner">
+      <div class="fb-step">
+        <div class="fb-icon">🧠</div>
+        <div class="fb-label">You Think</div>
+        <div class="fb-sub">SCIPAB Setup</div>
+      </div>
+      <div class="fb-arrow">→</div>
+      <div class="fb-step">
+        <div class="fb-icon">⚙️</div>
+        <div class="fb-label">AI Thinks</div>
+        <div class="fb-sub">5 Layers</div>
+      </div>
+      <div class="fb-arrow">→</div>
+      <div class="fb-step">
+        <div class="fb-icon">📊</div>
+        <div class="fb-label">You Measure</div>
+        <div class="fb-sub">Telemetry</div>
+      </div>
+      <div class="fb-arrow">→</div>
+      <div class="fb-step">
+        <div class="fb-icon">🚀</div>
+        <div class="fb-label">You Improve</div>
+        <div class="fb-sub">Coach Feedback</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="sl"><span class="stag">01</span> What do you want to debate?</div>
+  <input class="cpin" id="custom-topic-in"
+    placeholder="Type any topic… e.g. cats vs dogs, should voting be mandatory, Bitcoin vs Gold"
+    oninput="updateCustomTopic()"
+    style="width:100%;font-size:14px;padding:14px 18px;margin-bottom:.6rem;">
+
+  <div style="font-size:10px;color:var(--di);font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.7rem;display:flex;align-items:center;gap:8px;">⚡ Quick picks <span style="flex:1;height:1px;background:var(--bd);display:block;"></span></div>
+  <div class="topics" id="topic-cards">
+    <button class="topic sel" data-topic="Neapolitan vs New York Style Pizza" data-pos1="Neapolitan Pizza is the superior style" data-pos2="New York Style Pizza is the superior style" onclick="selectTopic(this)">
+      <div class="tick">✓</div>
+      <span class="te">🍕</span>
+      <div class="tt">Neapolitan vs New York Pizza</div>
+      <div class="tsub">The original tradition vs the iconic slice</div>
+    </button>
+    <button class="topic" data-topic="Artificial Intelligence will do more harm than good to society" data-pos1="AI will ultimately do more harm than good" data-pos2="AI will ultimately do more good than harm" onclick="selectTopic(this)">
+      <div class="tick">✓</div>
+      <span class="te">🤖</span>
+      <div class="tt">AI: More Harm or Good?</div>
+      <div class="tsub">Will artificial intelligence help or hurt humanity?</div>
+    </button>
+    <button class="topic" data-topic="Remote work vs returning to the office" data-pos1="Remote work is better for productivity and wellbeing" data-pos2="In-office work is better for productivity and wellbeing" onclick="selectTopic(this)">
+      <div class="tick">✓</div>
+      <span class="te">🏠</span>
+      <div class="tt">Remote Work vs Office</div>
+      <div class="tsub">Where does the future of work belong?</div>
+    </button>
+    <button class="topic" data-topic="Social media does more harm than good to society" data-pos1="Social media does more harm than good" data-pos2="Social media does more good than harm" onclick="selectTopic(this)">
+      <div class="tick">✓</div>
+      <span class="te">📱</span>
+      <div class="tt">Social Media: Harm or Good?</div>
+      <div class="tsub">Net positive or net negative for society?</div>
+    </button>
+    <button class="topic" data-topic="Lionel Messi vs Cristiano Ronaldo — who is the greatest footballer of all time" data-pos1="Lionel Messi is the greatest footballer of all time" data-pos2="Cristiano Ronaldo is the greatest footballer of all time" onclick="selectTopic(this)">
+      <div class="tick">✓</div>
+      <span class="te">⚽</span>
+      <div class="tt">Messi vs Ronaldo</div>
+      <div class="tsub">The greatest sporting debate of a generation</div>
+    </button>
+    <button class="topic" data-topic="University degrees are still worth the investment in today's world" data-pos1="A university degree is still worth the investment" data-pos2="University degrees are no longer worth the cost and time" onclick="selectTopic(this)">
+      <div class="tick">✓</div>
+      <span class="te">🎓</span>
+      <div class="tt">Is a University Degree Worth It?</div>
+      <div class="tsub">Traditional education vs real-world experience</div>
+    </button>
+  </div>
+
+  <div class="sl"><span class="stag">02</span> Set Both Sides of the Debate</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.8rem;">
+    <div>
+      <div style="font-size:10px;color:var(--p2);font-family:'JetBrains Mono',monospace;margin-bottom:6px;letter-spacing:.08em;">POSITION A</div>
+      <input class="cpin" id="custom-pos1-in" placeholder="e.g. Neapolitan Pizza is superior" oninput="updateCustomTopic()">
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--mu);font-family:'JetBrains Mono',monospace;margin-bottom:6px;letter-spacing:.08em;">POSITION B</div>
+      <input class="cpin" id="custom-pos2-in" placeholder="e.g. New York Style Pizza is superior" oninput="updateCustomTopic()">
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+    <span style="font-size:11px;color:var(--mu);font-family:'JetBrains Mono',monospace;">You argue:</span>
+    <button class="tone-chip sel" id="side-a-btn" onclick="selectPos('a')">Position A</button>
+    <button class="tone-chip" id="side-b-btn" onclick="selectPos('b')">Position B</button>
+  </div>
+
+  <div class="sl"><span class="stag">03</span> Configure Your Debater</div>
+  <div class="cfg">
+    <div class="cf">
+      <div class="cfl">Persona</div>
+      <select id="persona-sel">
+        <option value="a domain expert with deep specialist knowledge">🎓 Domain Expert</option>
+        <option value="a sharp critical analyst and investigative journalist">✍️ Critical Analyst</option>
+        <option value="a seasoned devil's advocate who challenges every assumption">😈 Devil's Advocate</option>
+        <option value="a data-driven scientist who relies on evidence and research">🔬 Science & Data</option>
+        <option value="a philosopher who examines the ethical and moral dimensions">🧠 Philosopher</option>
+        <option value="a public interest advocate who represents the everyday person">🗣️ Public Advocate</option>
+      </select>
+    </div>
+    <div class="cf">
+      <div class="cfl">Response Length</div>
+      <select id="wc-sel">
+        <option value="150-200">Short (150-200 words)</option>
+        <option value="200-250" selected>Medium (200-250 words)</option>
+        <option value="280-330">Long (280-330 words)</option>
+      </select>
+    </div>
+    <div class="cf">
+      <div class="cfl">AI Model</div>
+      <select id="model-sel">
+        <option value="claude-sonnet-4-6" selected>Sonnet 4.6 (Best)</option>
+        <option value="claude-haiku-4-5-20251001">Haiku 4.5 (Faster)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sl"><span class="stag">04</span> Tone</div>
+  <div class="tones" id="tone-chips">
+    <span class="tone-chip sel" data-tone="passionate and authoritative" onclick="selectTone(this)">🔥 Passionate</span>
+    <span class="tone-chip" data-tone="analytical and data-driven" onclick="selectTone(this)">📊 Analytical</span>
+    <span class="tone-chip" data-tone="conversational and engaging" onclick="selectTone(this)">💬 Conversational</span>
+    <span class="tone-chip" data-tone="academic and formal" onclick="selectTone(this)">🎓 Academic</span>
+    <span class="tone-chip" data-tone="provocative and bold" onclick="selectTone(this)">⚡ Bold</span>
+  </div>
+
+  <!-- SOURCE SELECTOR -->
+  <div class="acc-wrap">
+    <div class="acc-hd open" onclick="toggleAcc(this)">
+      <div class="acc-hl">📰 Knowledge Source <span class="acc-badge badge-blue" id="src-badge">Academic Research</span></div>
+      <span class="acc-ch open">▾</span>
+    </div>
+    <div class="acc-bd open">
+      <div class="src-grid" id="src-grid">
+        <button class="src-btn sel" data-src="peer-reviewed academic research and scholarly journals" onclick="selectSrc(this)">
+          <div class="si">🔬</div><div class="sn">Academic Research</div><div class="sd">Peer-reviewed studies</div>
+        </button>
+        <button class="src-btn" data-src="quality investigative journalism and expert commentary" onclick="selectSrc(this)">
+          <div class="si">📰</div><div class="sn">Journalism</div><div class="sd">Investigative reporting</div>
+        </button>
+        <button class="src-btn" data-src="industry reports, market data, and economic analysis" onclick="selectSrc(this)">
+          <div class="si">📊</div><div class="sn">Industry Data</div><div class="sd">Market & economics</div>
+        </button>
+        <button class="src-btn" data-src="historical records, archives, and documented precedent" onclick="selectSrc(this)">
+          <div class="si">📚</div><div class="sn">Historical Record</div><div class="sd">Archives & precedent</div>
+        </button>
+        <button class="src-btn" data-src="expert consensus from leading professional bodies and domain specialists" onclick="selectSrc(this)">
+          <div class="si">🏛️</div><div class="sn">Expert Consensus</div><div class="sd">Professional bodies</div>
+        </button>
+        <button class="src-btn" data-src="consumer research, public surveys, and real-world user data" onclick="selectSrc(this)">
+          <div class="si">👥</div><div class="sn">Public Opinion</div><div class="sd">Surveys & polls</div>
+        </button>
+      </div>
+      <div class="key-note">The AI will draw on this source's perspective and expertise to strengthen arguments.</div>
+    </div>
+  </div>
+
+  <!-- VOICE (ElevenLabs) -->
+  <div class="acc-wrap">
+    <div class="acc-hd" onclick="toggleAcc(this)">
+      <div class="acc-hl">🔊 Voice Playback <span class="acc-badge badge-warn" id="voice-badge">Browser TTS</span></div>
+      <span class="acc-ch">▾</span>
+    </div>
+    <div class="acc-bd">
+      <div class="key-row">
+        <input class="key-in" id="el-key-in" type="password" placeholder="ElevenLabs API key (optional)" autocomplete="off">
+        <button class="key-btn" onclick="saveElKey()">Save</button>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div class="cfl" style="margin-bottom:6px;">Voice</div>
+        <select id="voice-sel" style="width:200px;">
+          <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
+          <option value="AZnzlk1XvdvUeBnXmlld">Domi (Female)</option>
+          <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
+          <option value="VR6AewLTigWG4xSOukaG">Arnold (Male)</option>
+          <option value="pNInz6obpgDQGcFmaJgB">Adam (Male)</option>
+        </select>
+      </div>
+      <div class="key-note">Leave blank to use free browser speech synthesis. ElevenLabs gives higher quality AI voices. <a href="https://elevenlabs.io" target="_blank">Get a free key →</a></div>
+    </div>
+  </div>
+
+  <!-- RUN BUTTON -->
+  <button class="run-btn" id="run-btn" onclick="runDebate()">
+    <div class="run-spin" id="run-spin"></div>
+    <span id="run-text">⚡ Run 5-Layer Debate Analysis</span>
+  </button>
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap" id="prog-wrap">
+    <div class="prog-fill" id="prog-fill"></div>
+  </div>
+
+  <!-- TELEMETRY -->
+  <div class="tele">
+    <div class="tc" id="tc-in"><div class="tlbl">Input Tokens</div><div class="tval" id="tv-in">0</div><div class="tunit">tokens sent</div></div>
+    <div class="tc" id="tc-out"><div class="tlbl">Output Tokens</div><div class="tval" id="tv-out">0</div><div class="tunit">tokens received</div></div>
+    <div class="tc" id="tc-tot"><div class="tlbl">Total Tokens</div><div class="tval" id="tv-tot">0</div><div class="tunit">combined</div></div>
+    <div class="tc" id="tc-lat"><div class="tlbl">Avg Latency</div><div class="tval" id="tv-lat">0</div><div class="tunit">ms per call</div></div>
+    <div class="tc" id="tc-cost"><div class="tlbl">Est. Cost</div><div class="tval" id="tv-cost">$0.00</div><div class="tunit">USD</div></div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="sl" id="pipeline-label" style="display:none"><span class="stag">REASONING</span> 5-Layer Pipeline</div>
+  <div class="pipeline" id="pipeline"></div>
+
+  <!-- SCORE CARD -->
+  <div id="score-section" style="display:none;">
+    <div class="sl"><span class="stag">SCORE</span> Debate Score Card</div>
+    <div class="score-card" id="score-card"></div>
+  </div>
+
+  <!-- COACH -->
+  <div id="coach-section" style="display:none;">
+    <div class="sl"><span class="stag">COACH</span> Personal Feedback</div>
+    <div class="coach-card" id="coach-card"></div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div id="insights-section" style="display:none;">
+    <div class="sl"><span class="stag">TELEMETRY</span> Reasoning Insights</div>
+    <div class="ins-grid" id="ins-grid"></div>
+    <div class="chart-card" id="chart-card"></div>
+    <div class="exp-bar">
+      <span class="exp-lbl">Export:</span>
+      <button class="exp-btn" onclick="exportJSON()">📄 JSON</button>
+      <button class="exp-btn" onclick="exportMarkdown()">📝 Markdown</button>
+      <button class="exp-btn" onclick="window.print()">🖨️ Print / PDF</button>
+      <button class="exp-btn" onclick="copyAll()">📋 Copy All</button>
+    </div>
+  </div>
+
+  <!-- LIVE DEBATE -->
+  <div id="live-section">
+    <div class="sl"><span class="stag">LIVE</span> Live Debate Mode</div>
+    <div class="live-panel">
+      <div class="live-head">
+        <div class="live-title">⚡ Live Debate <span class="live-badge" id="live-badge">Inactive</span></div>
+        <div style="font-size:12px;color:var(--mu);">You argue, AI counters in real-time</div>
+      </div>
+      <div class="live-body">
+        <div class="live-transcript" id="live-transcript">
+          <div class="empty" style="padding:1.5rem;">
+            <div class="empty-icon">🎤</div>
+            <div class="empty-title">Ready for battle</div>
+            <div class="empty-sub">Set up your topic above, then start the live debate</div>
+          </div>
+        </div>
+        <div class="live-ctrl">
+          <button class="live-btn lbstart" id="live-start-btn" onclick="startLiveDebate()">🎤 Start Live Debate</button>
+          <button class="live-btn lbend" id="live-end-btn" onclick="endLiveDebate()" style="display:none;">⏹ End & Judge</button>
+          <div class="live-status" id="live-status"></div>
+          <div class="wave" id="live-wave" style="display:none;">
+            <div class="wave-bar" style="height:8px;"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar" style="height:8px;"></div>
+          </div>
+        </div>
+        <div class="live-result" id="live-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="history-section">
+    <div class="sl"><span class="stag">HISTORY</span> Past Debates</div>
+    <div class="hist-panel">
+      <div class="hist-head">
+        <div class="hist-title">📋 Debate History <span class="hist-badge" id="hist-count">0</span></div>
+        <button class="nbtn" onclick="clearHistory()">Clear All</button>
+      </div>
+      <div class="hist-list" id="hist-list">
+        <div class="hist-empty">No debates yet. Run your first analysis above!</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+</div><!-- /wrap -->
+
+<!-- PLAYER BAR -->
+<div class="player-bar" id="player-bar">
+  <div class="pb-label">🔊 Playing</div>
+  <div class="pb-info">
+    <div class="pb-layer" id="pb-layer">Layer 1</div>
+    <div class="pb-text" id="pb-text">...</div>
+    <div class="pb-prog"><div class="pb-fill" id="pb-fill"></div></div>
+  </div>
+  <button class="pb-stop" onclick="stopVoice()">■ Stop</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG — paste your Cloudflare Worker URL here after deploying
+// ─────────────────────────────────────────────
+const WORKER_URL = 'https://pizzaiq-proxy.zafaraadil.workers.dev';
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const S = {
+  elKey: localStorage.getItem('piq_el') || '',
+  topic: 'Neapolitan vs New York Style Pizza',
+  posA: 'Neapolitan Pizza is the superior style',
+  posB: 'New York Style Pizza is the superior style',
+  position: 'Neapolitan Pizza is the superior style',
+  persona: 'a domain expert with deep specialist knowledge',
+  tone: 'passionate and authoritative',
+  source: 'peer-reviewed academic research and scholarly journals',
+  wordCount: '200-250',
+  model: 'claude-sonnet-4-6',
+  layers: {},
+  layerTokens: {},
+  layerLatency: {},
+  tele: { in: 0, out: 0, tot: 0, latMs: 0, calls: 0 },
+  running: false,
+  liveActive: false,
+  liveHistory: [],
+  liveRounds: 0,
+  recognition: null,
+  synth: window.speechSynthesis,
+  currentUtterance: null,
+  history: JSON.parse(localStorage.getItem('piq_hist') || '[]')
+};
+
+// ─────────────────────────────────────────────
+// PROMPTS
+// ─────────────────────────────────────────────
+const PROMPTS = {
+  l1: (p) => `You are writing as a ${p.persona}. Tone: ${p.tone}. Draw on the expertise of ${p.source}.
+
+Layer 1 — Context Analysis.
+Topic: "${p.topic}". Position to examine: "${p.position}".
+
+Objectively map this debate. Identify exactly 4-5 key factors that define the debate landscape. Surface hidden assumptions on BOTH sides. Do NOT take a position yet — stay neutral and analytical.
+${p.wc} words maximum.`,
+
+  l2: (p) => `You are writing as a ${p.persona}. Tone: ${p.tone}. Draw on the expertise of ${p.source}.
+
+Layer 2 — Argument Builder.
+Topic: "${p.topic}". You are DEFENDING: "${p.position}".
+
+Context established in Layer 1:
+${p.l1}
+
+Building directly on that context, construct 3 distinct, evidence-backed arguments defending the position. For each: state the Claim, provide Evidence, give a concrete Example. Be specific — no vague generalities.
+${p.wc} words maximum.`,
+
+  l3: (p) => `You are writing as a ${p.persona}. Tone: ${p.tone}. Draw on the expertise of ${p.source}.
+
+Layer 3 — Counter Argument.
+Topic: "${p.topic}". Now CHALLENGE: "${p.position}".
+
+What was established so far:
+Layer 1 (Context): ${p.l1}
+Layer 2 (Arguments for position): ${p.l2}
+
+Now generate the 3 strongest possible opposing arguments. No strawmen — these must be genuinely compelling counter-arguments that would challenge even a strong defender of the position. Reference the Layer 2 arguments directly and dismantle them.
+${p.wc} words maximum.`,
+
+  l4: (p) => `You are writing as a ${p.persona}. Tone: ${p.tone}. Draw on the expertise of ${p.source}.
+
+Layer 4 — Self-Critique.
+Topic: "${p.topic}". Position: "${p.position}".
+
+Full reasoning chain so far:
+Layer 1 (Context): ${p.l1}
+Layer 2 (Arguments): ${p.l2}
+Layer 3 (Counter-arguments): ${p.l3}
+
+Now honestly identify 3-4 weaknesses in the Layer 2 arguments, acknowledging which counter-arguments from Layer 3 land hardest. Suggest specific improvements for each weakness. Be intellectually honest — overconfidence is a weakness.
+${p.wc} words maximum.`,
+
+  l5: (p) => `You are writing as a ${p.persona}. Tone: ${p.tone}. Draw on the expertise of ${p.source}.
+
+Layer 5 — Final Strategy.
+Topic: "${p.topic}". Original position: "${p.position}".
+
+Complete reasoning chain:
+Layer 1 (Context): ${p.l1}
+Layer 2 (Arguments): ${p.l2}
+Layer 3 (Counter-arguments): ${p.l3}
+Layer 4 (Self-critique): ${p.l4}
+
+Synthesise all layers into a refined, nuanced final position. Acknowledge where the opposition is strongest. State the conditions under which each side wins. End with a bold "Final Verdict:" sentence that is definitive and memorable.
+${p.wc} words maximum.`,
+
+  score: (p) => `You are a debate judge. Score this debate strictly and fairly.
+
+Topic: "${p.topic}"
+Position argued: "${p.position}"
+
+Layer 1 (Context Analysis): ${p.l1}
+Layer 2 (Arguments): ${p.l2}
+Layer 3 (Counter-arguments): ${p.l3}
+Layer 4 (Self-critique): ${p.l4}
+Layer 5 (Final Strategy): ${p.l5}
+
+Score on four dimensions (0-100 each):
+- Argument Strength: How strong and well-supported are the core arguments?
+- Evidence Quality: How concrete and credible is the evidence used?
+- Logical Coherence: How well does the reasoning chain hold together across all 5 layers?
+- Persuasiveness: How convincing is this overall as a debate performance?
+
+Respond ONLY with valid JSON, no other text:
+{"strength":85,"evidence":72,"logic":90,"persuasion":78,"overall":81,"verdict":"One sentence summary of argument quality","recommendation":"One specific actionable improvement tip"}`,
+
+  coach: (p) => `You are an expert debate coach with 20 years of experience in competitive debating, culinary criticism, and public speaking.
+
+Analyse this pizza debate and provide PERSONAL coaching feedback.
+
+Topic: "${p.topic}"
+Position argued: "${p.position}"
+Persona used: ${p.persona}
+Score achieved: ${p.score}/100
+
+The 5-layer debate:
+[Context Analysis]: ${p.l1}
+[Arguments]: ${p.l2}
+[Counter Arguments]: ${p.l3}
+[Self-Critique]: ${p.l4}
+[Final Strategy]: ${p.l5}
+
+Provide coaching in this exact structure using markdown headers:
+
+**Your Debating Strengths**
+(2-3 specific things done well — cite exact phrases or moments)
+
+**Key Areas to Improve**
+(2-3 specific weaknesses with actionable advice)
+
+**Your Debating Style Profile**
+(2 sentences: what kind of debater are they, tendencies and blind spots)
+
+**Personalised Exercise**
+(One specific practice exercise for this debater's weaknesses)
+
+**Quick Win for Next Debate**
+(Single most impactful change they can make immediately)
+
+Be direct, specific, encouraging. Reference their actual words.`,
+
+  liveOpen: (p) => `You are opening a live spoken debate about pizza.
+Topic: "${p.topic}". The human will argue: "${p.position}". You argue the opposite.
+In 2-3 sentences, briefly introduce the debate and challenge them to make their case. Be energetic and direct. No preamble.`,
+
+  liveReply: (p) => `You are an expert debate opponent in a live spoken pizza debate.
+Topic: "${p.topic}". Human argues: "${p.position}". You argue the OPPOSITE.
+You are a ${p.persona} drawing on ${p.source}.
+
+Conversation so far:
+${p.history}
+
+Human just said: "${p.speech}"
+
+Respond with a sharp counter-argument in 3-5 sentences max — spoken naturally. Be conversational, not formal. Start directly with your counter-point.`,
+
+  liveJudge: (p) => `You judged a live spoken pizza debate.
+
+Topic: "${p.topic}"
+Human's position: "${p.position}"
+AI argued the opposite.
+Rounds: ${p.rounds}
+
+Full transcript:
+${p.transcript}
+
+Provide a concise summary in this exact JSON (no other text):
+{"winner":"Human","winner_reason":"One sentence why","human_score":75,"ai_score":82,"human_best":"Strongest human point","ai_best":"Strongest AI point","human_tip":"One specific tip","verdict":"One punchy final sentence"}`
+};
+
+// ─────────────────────────────────────────────
+// API CALL
+// ─────────────────────────────────────────────
+async function callClaude(prompt, maxTokens = 1200) {
+  const t0 = Date.now();
+  const res = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      model: S.model,
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const latency = Date.now() - t0;
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  const text = data.content[0].text;
+  const u = data.usage;
+  S.tele.in += u.input_tokens;
+  S.tele.out += u.output_tokens;
+  S.tele.tot += u.input_tokens + u.output_tokens;
+  S.tele.latMs = ((S.tele.latMs * S.tele.calls) + latency) / (S.tele.calls + 1);
+  S.tele.calls++;
+  updateTelemetry();
+  return { text, in: u.input_tokens, out: u.output_tokens, latency };
+}
+
+// ─────────────────────────────────────────────
+// TELEMETRY
+// ─────────────────────────────────────────────
+function updateTelemetry() {
+  animateNum('tv-in', S.tele.in);
+  animateNum('tv-out', S.tele.out);
+  animateNum('tv-tot', S.tele.tot);
+  document.getElementById('tv-lat').textContent = Math.round(S.tele.latMs).toLocaleString();
+  const cost = (S.tele.in * 0.000003 + S.tele.out * 0.000015).toFixed(4);
+  document.getElementById('tv-cost').textContent = '$' + cost;
+  ['tc-in','tc-out','tc-tot','tc-lat','tc-cost'].forEach(id => {
+    document.getElementById(id).classList.add('lit');
+    setTimeout(() => document.getElementById(id).classList.remove('lit'), 600);
+  });
+}
+
+function animateNum(id, target) {
+  const el = document.getElementById(id);
+  const start = parseInt(el.textContent.replace(/,/g, '')) || 0;
+  const diff = target - start;
+  if (diff <= 0) { el.textContent = target.toLocaleString(); return; }
+  const steps = 20;
+  let i = 0;
+  const iv = setInterval(() => {
+    i++;
+    el.textContent = Math.round(start + diff * (i / steps)).toLocaleString();
+    if (i >= steps) clearInterval(iv);
+  }, 30);
+}
+
+// ─────────────────────────────────────────────
+// LAYER CARD RENDERING
+// ─────────────────────────────────────────────
+const LAYER_META = [
+  { color: 'var(--l1)', label: 'Context Analysis', sub: 'Mapping the debate landscape', q: 'What is the problem and what influences it?' },
+  { color: 'var(--l2)', label: 'Argument Builder', sub: 'Building the case for your position', q: 'What is my position and why?' },
+  { color: 'var(--l3)', label: 'Counter Argument', sub: 'Generating the strongest opposition', q: 'What is the strongest opposing view?' },
+  { color: 'var(--l4)', label: 'Self-Critique', sub: 'Identifying weaknesses and gaps', q: 'Where is my argument weak?' },
+  { color: 'var(--l5)', label: 'Final Strategy', sub: 'Synthesising into a balanced conclusion', q: 'What is the most informed answer?' }
+];
+
+function initPipeline() {
+  const pl = document.getElementById('pipeline');
+  pl.innerHTML = '';
+  document.getElementById('pipeline-label').style.display = 'flex';
+  for (let i = 0; i < 5; i++) {
+    const m = LAYER_META[i];
+    pl.innerHTML += `
+      <div class="lcard" id="lcard${i+1}" style="--lc:${m.color}">
+        <div class="lhdr">
+          <div class="lnum" style="color:${m.color};border-color:${m.color};">${i+1}</div>
+          <div class="lmeta">
+            <div class="ltitle">${m.label}</div>
+            <div class="lsub">${m.sub}</div>
+            <div class="lq">${m.q}</div>
+          </div>
+          <div class="lstat" id="lstat${i+1}" style="color:var(--di);border-color:var(--di);">PENDING</div>
+        </div>
+        <div class="lbody" id="lbody${i+1}">
+          <div style="color:var(--di);font-size:12px;padding:4px 0;">Waiting to run…</div>
+        </div>
+        <div class="lfoot" id="lfoot${i+1}" style="display:none;">
+          <div class="ltok">IN:<b id="ltin${i+1}">0</b></div>
+          <div class="ltok">OUT:<b id="ltout${i+1}">0</b></div>
+          <button class="lbtn" onclick="copyLayer(${i+1})">📋 Copy</button>
+          <button class="lbtn play" id="lplay${i+1}" onclick="playLayer(${i+1})">🔊 Listen</button>
+          <div class="llatency" id="llat${i+1}"></div>
+        </div>
+      </div>
+      ${i < 4 ? `<div class="flow-conn"><div class="flow-line" id="fline${i+1}"></div><div class="flow-dot" id="fdot${i+1}"></div></div>` : ''}
+    `;
+  }
+}
+
+function setLayerState(n, state, text = '') {
+  const m = LAYER_META[n-1];
+  const card = document.getElementById(`lcard${n}`);
+  const stat = document.getElementById(`lstat${n}`);
+  const body = document.getElementById(`lbody${n}`);
+  if (state === 'running') {
+    card.classList.add('active');
+    stat.textContent = 'RUNNING';
+    stat.style.color = m.color;
+    stat.style.borderColor = m.color;
+    body.innerHTML = `<div class="lspin"><div class="ld"></div><div class="ld"></div><div class="ld"></div><span style="font-size:11px;color:var(--mu);margin-left:6px;">Thinking…</span></div>`;
+    // activate connector above
+    if (n > 1) {
+      document.getElementById(`fline${n-1}`)?.classList.add('active');
+      document.getElementById(`fdot${n-1}`)?.classList.add('active');
+    }
+  } else if (state === 'done') {
+    card.classList.remove('active');
+    card.classList.add('done');
+    stat.textContent = 'DONE';
+    stat.style.color = m.color;
+    stat.style.borderColor = m.color;
+    body.innerHTML = `<div class="ltext" id="ltext${n}"></div>`;
+    typeText(`ltext${n}`, text);
+    document.getElementById(`lfoot${n}`).style.display = 'flex';
+  } else if (state === 'error') {
+    stat.textContent = 'ERROR';
+    stat.style.color = 'var(--err)';
+    stat.style.borderColor = 'var(--err)';
+    body.innerHTML = `<div style="color:var(--err);font-size:12px;">${text}</div>`;
+  }
+}
+
+function setLayerTokens(n, inTok, outTok, latency) {
+  document.getElementById(`ltin${n}`).textContent = inTok.toLocaleString();
+  document.getElementById(`ltout${n}`).textContent = outTok.toLocaleString();
+  document.getElementById(`llat${n}`).textContent = latency + 'ms';
+  S.layerTokens[n] = { in: inTok, out: outTok };
+  S.layerLatency[n] = latency;
+}
+
+function typeText(id, text) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const words = text.split(' ');
+  let i = 0;
+  el.textContent = '';
+  const iv = setInterval(() => {
+    if (i >= words.length) { clearInterval(iv); return; }
+    el.textContent += (i > 0 ? ' ' : '') + words[i];
+    i++;
+  }, 18);
+}
+
+// ─────────────────────────────────────────────
+// PROGRESS
+// ─────────────────────────────────────────────
+function setProgress(pct) {
+  document.getElementById('prog-wrap').style.display = 'block';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+// ─────────────────────────────────────────────
+// MAIN RUN
+// ─────────────────────────────────────────────
+async function runDebate() {
+  if (S.running) return;
+  if (!S.apiKey) { showToast('⚠️ Set your Anthropic API key first', 'err'); return; }
+
+  S.running = true;
+  S.layers = {};
+  S.layerTokens = {};
+  S.tele = { in: 0, out: 0, tot: 0, latMs: 0, calls: 0 };
+  updateTelemetry();
+
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  document.getElementById('run-spin').style.display = 'block';
+  document.getElementById('run-text').textContent = 'Running analysis…';
+  document.getElementById('score-section').style.display = 'none';
+  document.getElementById('coach-section').style.display = 'none';
+  document.getElementById('insights-section').style.display = 'none';
+
+  initPipeline();
+  setProgress(5);
+
+  const p = { topic: S.topic, position: S.position, persona: S.persona, tone: S.tone, source: S.source, wc: S.wordCount };
+
+  try {
+    // LAYER 1
+    setLayerState(1, 'running');
+    const r1 = await callClaude(PROMPTS.l1(p));
+    S.layers[1] = r1.text;
+    setLayerState(1, 'done', r1.text);
+    setLayerTokens(1, r1.in, r1.out, r1.latency);
+    setProgress(22);
+
+    // LAYER 2
+    setLayerState(2, 'running');
+    const r2 = await callClaude(PROMPTS.l2({ ...p, l1: S.layers[1] }));
+    S.layers[2] = r2.text;
+    setLayerState(2, 'done', r2.text);
+    setLayerTokens(2, r2.in, r2.out, r2.latency);
+    setProgress(40);
+
+    // LAYER 3
+    setLayerState(3, 'running');
+    const r3 = await callClaude(PROMPTS.l3({ ...p, l1: S.layers[1], l2: S.layers[2] }));
+    S.layers[3] = r3.text;
+    setLayerState(3, 'done', r3.text);
+    setLayerTokens(3, r3.in, r3.out, r3.latency);
+    setProgress(58);
+
+    // LAYER 4
+    setLayerState(4, 'running');
+    const r4 = await callClaude(PROMPTS.l4({ ...p, l1: S.layers[1], l2: S.layers[2], l3: S.layers[3] }));
+    S.layers[4] = r4.text;
+    setLayerState(4, 'done', r4.text);
+    setLayerTokens(4, r4.in, r4.out, r4.latency);
+    setProgress(76);
+
+    // LAYER 5
+    setLayerState(5, 'running');
+    const r5 = await callClaude(PROMPTS.l5({ ...p, l1: S.layers[1], l2: S.layers[2], l3: S.layers[3], l4: S.layers[4] }), 1400);
+    S.layers[5] = r5.text;
+    setLayerState(5, 'done', r5.text);
+    setLayerTokens(5, r5.in, r5.out, r5.latency);
+    setProgress(88);
+
+    // SCORE
+    await runScore(p);
+    setProgress(100);
+
+    // COACH (after short delay for UX)
+    setTimeout(() => runCoach(p), 800);
+
+    // INSIGHTS
+    setTimeout(() => showInsights(), 1200);
+
+    // SAVE HISTORY
+    saveToHistory();
+    showToast('✅ Debate analysis complete!', 'ok');
+
+  } catch (err) {
+    showToast('❌ ' + err.message, 'err');
+    console.error(err);
+  } finally {
+    S.running = false;
+    btn.disabled = false;
+    document.getElementById('run-spin').style.display = 'none';
+    document.getElementById('run-text').textContent = '⚡ Run 5-Layer Debate Analysis';
+  }
+}
+
+// ─────────────────────────────────────────────
+// SCORE CARD
+// ─────────────────────────────────────────────
+async function runScore(p) {
+  document.getElementById('score-section').style.display = 'block';
+  document.getElementById('score-card').innerHTML = `<div class="lbody"><div class="lspin"><div class="ld"></div><div class="ld"></div><div class="ld"></div><span style="font-size:11px;color:var(--mu);margin-left:6px;">Judging…</span></div></div>`;
+
+  try {
+    const r = await callClaude(PROMPTS.score({ ...p, l1: S.layers[1], l2: S.layers[2], l3: S.layers[3], l4: S.layers[4], l5: S.layers[5] }), 400);
+    const jsonStr = r.text.match(/\{[\s\S]*\}/)?.[0];
+    const sc = JSON.parse(jsonStr);
+    S.score = sc;
+    renderScoreCard(sc);
+  } catch (e) {
+    document.getElementById('score-card').innerHTML = `<div class="lbody"><div style="color:var(--err);">Score unavailable: ${e.message}</div></div>`;
+  }
+}
+
+function renderScoreCard(sc) {
+  const cls = sc.overall >= 85 ? 'ex' : sc.overall >= 70 ? 'gd' : sc.overall >= 55 ? 'ok' : 'wk';
+  const barColor = { strength:'#0ea5e9', evidence:'#818cf8', logic:'#10b981', persuasion:'#f59e0b' };
+  document.getElementById('score-card').innerHTML = `
+    <div class="sc-head">
+      <div class="sc-title">🏆 Debate Score Card</div>
+      <div class="sc-total ${cls}">${sc.overall}<span style="font-size:16px;color:var(--di)">/100</span></div>
+    </div>
+    <div class="sc-body">
+      ${[['Argument Strength','strength'],['Evidence Quality','evidence'],['Logical Coherence','logic'],['Persuasiveness','persuasion']].map(([lbl,key]) => `
+      <div class="sc-row">
+        <div class="sc-lbl">${lbl}</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" id="bar-${key}" style="background:${barColor[key]};"></div></div>
+        <div class="sc-score" style="color:${barColor[key]}">${sc[key]}</div>
+      </div>`).join('')}
+      <div class="sc-verdict">${sc.verdict}</div>
+      <div class="sc-rec">💡 ${sc.recommendation}</div>
+    </div>`;
+  // Animate bars after render
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      ['strength','evidence','logic','persuasion'].forEach(k => {
+        const b = document.getElementById('bar-' + k);
+        if (b) b.style.width = sc[k] + '%';
+      });
+    }, 100);
+  });
+}
+
+// ─────────────────────────────────────────────
+// COACH CARD
+// ─────────────────────────────────────────────
+async function runCoach(p) {
+  document.getElementById('coach-section').style.display = 'block';
+  document.getElementById('coach-card').innerHTML = `
+    <div class="coach-head">
+      <div class="coach-av">🎓</div>
+      <div><div class="coach-title">Debate Coach</div><div class="coach-sub">Generating personal feedback…</div></div>
+    </div>
+    <div class="coach-body"><div class="lspin"><div class="ld" style="background:var(--p)"></div><div class="ld" style="background:var(--p)"></div><div class="ld" style="background:var(--p)"></div></div></div>`;
+
+  try {
+    const r = await callClaude(PROMPTS.coach({ ...p, l1: S.layers[1], l2: S.layers[2], l3: S.layers[3], l4: S.layers[4], l5: S.layers[5], score: S.score?.overall || '?' }), 900);
+    document.getElementById('coach-card').innerHTML = `
+      <div class="coach-head">
+        <div class="coach-av">🎓</div>
+        <div><div class="coach-title">Debate Coach</div><div class="coach-sub">20 years of competitive debate expertise</div></div>
+      </div>
+      <div class="coach-body"><div class="coach-text">${mdToHtml(r.text)}</div></div>`;
+  } catch (e) {
+    document.getElementById('coach-card').innerHTML += `<div class="coach-body"><div style="color:var(--err);">Feedback unavailable.</div></div>`;
+  }
+}
+
+function mdToHtml(t) {
+  return t
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^#{1,3}\s+(.+)$/gm, '<h4>$1</h4>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>').replace(/$/, '</p>');
+}
+
+// ─────────────────────────────────────────────
+// INSIGHTS / CHARTS
+// ─────────────────────────────────────────────
+function showInsights() {
+  document.getElementById('insights-section').style.display = 'block';
+  const totalLat = Object.values(S.layerLatency).reduce((a,b) => a+b, 0);
+  const maxTok = Math.max(...Object.values(S.layerTokens).map(t => t.in + t.out));
+
+  document.getElementById('ins-grid').innerHTML = `
+    <div class="ins-c" style="--ic:var(--p)"><div class="ins-lbl">Total Tokens</div><div class="ins-val">${S.tele.tot.toLocaleString()}</div><div class="ins-desc">Across 5 layers + score + coach</div></div>
+    <div class="ins-c" style="--ic:var(--l2)"><div class="ins-lbl">Avg Latency</div><div class="ins-val">${Math.round(S.tele.latMs).toLocaleString()}ms</div><div class="ins-desc">Per API call average</div></div>
+    <div class="ins-c" style="--ic:var(--g2)"><div class="ins-lbl">Est. Cost</div><div class="ins-val">$${(S.tele.in*0.000003+S.tele.out*0.000015).toFixed(4)}</div><div class="ins-desc">Input $3/M · Output $15/M</div></div>
+    <div class="ins-c" style="--ic:var(--warn)"><div class="ins-lbl">Score</div><div class="ins-val">${S.score?.overall || '—'}</div><div class="ins-desc">${S.score?.verdict?.slice(0,40) || '—'}…</div></div>
+  `;
+
+  const colors = ['var(--l1)','var(--l2)','var(--l3)','var(--l4)','var(--l5)'];
+  const heights = [1,2,3,4,5].map(n => {
+    const t = (S.layerTokens[n]?.in || 0) + (S.layerTokens[n]?.out || 0);
+    return maxTok > 0 ? Math.max(8, (t / maxTok) * 100) : 8;
+  });
+
+  document.getElementById('chart-card').innerHTML = `
+    <div class="chart-lbl">Token usage per reasoning layer</div>
+    <div class="chart-bars">
+      ${[1,2,3,4,5].map((n,i) => `
+      <div class="bwrap">
+        <div class="bval">${((S.layerTokens[n]?.in||0)+(S.layerTokens[n]?.out||0)).toLocaleString()}</div>
+        <div class="bar" style="height:${heights[i]}px;background:${colors[i]};"></div>
+        <div class="blbl">L${n}</div>
+      </div>`).join('')}
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// HISTORY
+// ─────────────────────────────────────────────
+function saveToHistory() {
+  const TOPIC_EMOJI = { pizza:'🍕', ai:'🤖', remote:'🏠', social:'📱', football:'⚽', university:'🎓' };
+  const topicKey = S.topic.toLowerCase();
+  const em = topicKey.includes('pizza') ? '🍕' : topicKey.includes('ai ') || topicKey.includes('artificial') ? '🤖' : topicKey.includes('remote') ? '🏠' : topicKey.includes('social') ? '📱' : topicKey.includes('messi') || topicKey.includes('football') || topicKey.includes('ronaldo') ? '⚽' : topicKey.includes('university') || topicKey.includes('degree') ? '🎓' : '💬';
+  const item = {
+    id: Date.now(),
+    topic: S.topic,
+    position: S.position,
+    score: S.score?.overall || null,
+    tokens: S.tele.tot,
+    cost: +(S.tele.in*0.000003+S.tele.out*0.000015).toFixed(4),
+    date: new Date().toISOString(),
+    layers: { ...S.layers },
+    em
+  };
+  S.history.unshift(item);
+  if (S.history.length > 30) S.history = S.history.slice(0, 30);
+  localStorage.setItem('piq_hist', JSON.stringify(S.history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('hist-list');
+  document.getElementById('hist-count').textContent = S.history.length;
+  if (!S.history.length) {
+    list.innerHTML = '<div class="hist-empty">No debates yet. Run your first analysis above!</div>';
+    return;
+  }
+  list.innerHTML = S.history.map(h => `
+    <div class="hist-item" onclick="loadHistory('${h.id}')">
+      <div class="hi-em">${h.em || '💬'}</div>
+      <div class="hi-info">
+        <div class="hi-topic">${h.topic}</div>
+        <div class="hi-meta">${h.position} · ${new Date(h.date).toLocaleDateString()} · ${h.tokens.toLocaleString()} tokens</div>
+      </div>
+      <div class="hi-score">${h.score || '—'}</div>
+      <button class="hi-del" onclick="event.stopPropagation();deleteHistory('${h.id}')">✕</button>
+    </div>`).join('');
+}
+
+function loadHistory(id) {
+  const h = S.history.find(x => x.id == id);
+  if (!h) return;
+  S.topic = h.topic;
+  S.position = h.position;
+  S.layers = h.layers;
+  initPipeline();
+  for (let n = 1; n <= 5; n++) {
+    if (h.layers[n]) setLayerState(n, 'done', h.layers[n]);
+  }
+  document.getElementById('pipeline-label').style.display = 'flex';
+  showToast('📋 Loaded from history', 'info');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function deleteHistory(id) {
+  S.history = S.history.filter(x => x.id != id);
+  localStorage.setItem('piq_hist', JSON.stringify(S.history));
+  renderHistory();
+}
+
+function clearHistory() {
+  if (!confirm('Clear all debate history?')) return;
+  S.history = [];
+  localStorage.setItem('piq_hist', JSON.stringify(S.history));
+  renderHistory();
+}
+
+// ─────────────────────────────────────────────
+// VOICE
+// ─────────────────────────────────────────────
+function copyLayer(n) {
+  navigator.clipboard.writeText(S.layers[n] || '').then(() => showToast('📋 Copied!', 'ok'));
+}
+
+async function playLayer(n) {
+  const text = S.layers[n];
+  if (!text) return;
+  const btn = document.getElementById(`lplay${n}`);
+  btn.textContent = '⏹ Stop';
+  btn.classList.add('playing');
+  showPlayerBar(`Layer ${n} — ${LAYER_META[n-1].label}`, text);
+  if (S.elKey) {
+    await playElevenLabs(text, n);
+  } else {
+    playBrowserTTS(text, n);
+  }
+}
+
+async function playElevenLabs(text, layerN) {
+  const voiceId = document.getElementById('voice-sel').value;
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: { 'xi-api-key': S.elKey, 'content-type': 'application/json' },
+      body: JSON.stringify({ text, model_id: 'eleven_turbo_v2_5', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+    });
+    if (!res.ok) throw new Error('ElevenLabs error');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    S.currentAudio = audio;
+    audio.onended = () => resetPlayBtn(layerN);
+    audio.play();
+  } catch (e) {
+    playBrowserTTS(text, layerN);
+  }
+}
+
+function playBrowserTTS(text, layerN) {
+  if (S.synth.speaking) S.synth.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.95;
+  utt.pitch = 1;
+  utt.onend = () => resetPlayBtn(layerN);
+  S.currentUtterance = utt;
+  S.synth.speak(utt);
+}
+
+function resetPlayBtn(n) {
+  const btn = document.getElementById(`lplay${n}`);
+  if (btn) { btn.textContent = '🔊 Listen'; btn.classList.remove('playing'); }
+  hidePlayerBar();
+}
+
+function stopVoice() {
+  if (S.synth.speaking) S.synth.cancel();
+  if (S.currentAudio) { S.currentAudio.pause(); S.currentAudio = null; }
+  for (let n = 1; n <= 5; n++) resetPlayBtn(n);
+}
+
+function showPlayerBar(layer, text) {
+  document.getElementById('pb-layer').textContent = layer;
+  document.getElementById('pb-text').textContent = text.slice(0, 80) + '…';
+  document.getElementById('player-bar').classList.add('show');
+}
+function hidePlayerBar() { document.getElementById('player-bar').classList.remove('show'); }
+
+// ─────────────────────────────────────────────
+// LIVE DEBATE
+// ─────────────────────────────────────────────
+async function startLiveDebate() {
+  if (!S.apiKey) { showToast('⚠️ Set your API key first', 'err'); return; }
+  S.liveActive = true;
+  S.liveHistory = [];
+  S.liveRounds = 0;
+  document.getElementById('live-transcript').innerHTML = '';
+  document.getElementById('live-result').style.display = 'none';
+  document.getElementById('live-start-btn').style.display = 'none';
+  document.getElementById('live-end-btn').style.display = 'flex';
+  document.getElementById('live-badge').textContent = '● LIVE';
+  document.getElementById('live-badge').classList.add('on');
+  setLiveStatus('AI is opening the debate…');
+
+  try {
+    const r = await callClaude(PROMPTS.liveOpen({ topic: S.topic, position: S.position }), 300);
+    appendMsg('ai', 'DebateIQ', r.text);
+    S.liveHistory.push({ role: 'AI', text: r.text });
+    if (S.elKey) playElevenLabs(r.text, 0); else playBrowserTTS(r.text, 0);
+    setTimeout(() => startListening(), 1500);
+  } catch (e) {
+    showToast('❌ ' + e.message, 'err');
+    endLiveDebate();
+  }
+}
+
+function startListening() {
+  if (!S.liveActive) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { setLiveStatus('⚠️ Speech recognition not supported. Use Chrome/Edge.'); return; }
+  const r = new SR();
+  r.continuous = false;
+  r.interimResults = false;
+  r.lang = 'en-US';
+  S.recognition = r;
+  r.onstart = () => { setLiveStatus('🎤 Listening…'); document.getElementById('live-wave').style.display = 'flex'; };
+  r.onresult = async (e) => {
+    const speech = e.results[0][0].transcript;
+    document.getElementById('live-wave').style.display = 'none';
+    appendMsg('human', 'You', speech);
+    S.liveHistory.push({ role: 'Human', text: speech });
+    S.liveRounds++;
+    await handleLiveReply(speech);
+  };
+  r.onerror = (e) => { setLiveStatus('⚠️ Mic error: ' + e.error); document.getElementById('live-wave').style.display = 'none'; };
+  r.onend = () => { if (S.liveActive) document.getElementById('live-wave').style.display = 'none'; };
+  r.start();
+}
+
+async function handleLiveReply(speech) {
+  if (!S.liveActive) return;
+  setLiveStatus('AI is countering…');
+  const histText = S.liveHistory.slice(-6).map(m => `${m.role}: ${m.text}`).join('\n');
+  try {
+    const r = await callClaude(PROMPTS.liveReply({ topic: S.topic, position: S.position, persona: S.persona, source: S.source, history: histText, speech }), 400);
+    appendMsg('ai', 'DebateIQ', r.text);
+    S.liveHistory.push({ role: 'AI', text: r.text });
+    if (S.elKey) await playElevenLabs(r.text, 0); else playBrowserTTS(r.text, 0);
+    setTimeout(() => { if (S.liveActive) startListening(); }, 2000);
+  } catch (e) {
+    showToast('❌ ' + e.message, 'err');
+  }
+}
+
+async function endLiveDebate() {
+  S.liveActive = false;
+  if (S.recognition) S.recognition.abort();
+  stopVoice();
+  document.getElementById('live-start-btn').style.display = 'flex';
+  document.getElementById('live-end-btn').style.display = 'none';
+  document.getElementById('live-badge').textContent = 'Inactive';
+  document.getElementById('live-badge').classList.remove('on');
+  document.getElementById('live-wave').style.display = 'none';
+  setLiveStatus('');
+
+  if (S.liveRounds === 0) return;
+  setLiveStatus('Judging the debate…');
+
+  const transcript = S.liveHistory.map(m => `${m.role}: ${m.text}`).join('\n\n');
+  try {
+    const r = await callClaude(PROMPTS.liveJudge({ topic: S.topic, position: S.position, rounds: S.liveRounds, transcript }), 500);
+    const jsonStr = r.text.match(/\{[\s\S]*\}/)?.[0];
+    const result = JSON.parse(jsonStr);
+    renderLiveResult(result);
+  } catch (e) {
+    setLiveStatus('');
+  }
+}
+
+function renderLiveResult(r) {
+  setLiveStatus('');
+  const res = document.getElementById('live-result');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="lr-head">🏆 Verdict: ${r.winner} wins — ${r.winner_reason}</div>
+    <div class="lr-scores">
+      <div class="lrs"><div class="lrs-lbl">You scored</div><div class="lrs-val">${r.human_score}/100</div></div>
+      <div class="lrs"><div class="lrs-lbl">AI scored</div><div class="lrs-val">${r.ai_score}/100</div></div>
+    </div>
+    <div class="lr-text">
+      <strong>Your best point:</strong> ${r.human_best}<br><br>
+      <strong>AI's best point:</strong> ${r.ai_best}<br><br>
+      <strong>Tip for next time:</strong> ${r.human_tip}<br><br>
+      <em>${r.verdict}</em>
+    </div>`;
+}
+
+function appendMsg(type, name, text) {
+  const t = document.getElementById('live-transcript');
+  t.innerHTML += `
+    <div class="msg">
+      <div class="msg-av ${type}">${type === 'human' ? '👤' : '⚡'}</div>
+      <div class="msg-body">
+        <div class="msg-name">${name}</div>
+        <div class="msg-text">${text}</div>
+      </div>
+    </div>`;
+  t.scrollTop = t.scrollHeight;
+}
+
+function setLiveStatus(txt) { document.getElementById('live-status').textContent = txt; }
+
+// ─────────────────────────────────────────────
+// EXPORT
+// ─────────────────────────────────────────────
+function exportJSON() {
+  const data = { topic: S.topic, position: S.position, persona: S.persona, tone: S.tone, source: S.source, layers: S.layers, score: S.score, telemetry: S.tele, generated: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `pizzaiq-${Date.now()}.json`;
+  a.click();
+}
+
+function exportMarkdown() {
+  let md = `# DebateIQ Report\n\n**Topic:** ${S.topic}\n**Position:** ${S.position}\n**Persona:** ${S.persona}\n\n---\n\n`;
+  for (let n = 1; n <= 5; n++) {
+    md += `## Layer ${n}: ${LAYER_META[n-1].label}\n\n${S.layers[n] || ''}\n\n---\n\n`;
+  }
+  if (S.score) md += `## Score Card\nOverall: ${S.score.overall}/100\n${S.score.verdict}\n`;
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `pizzaiq-${Date.now()}.md`; a.click();
+}
+
+function copyAll() {
+  let txt = `PIZZAIQ DEBATE — ${S.topic}\nPosition: ${S.position}\n\n`;
+  for (let n = 1; n <= 5; n++) txt += `LAYER ${n}: ${LAYER_META[n-1].label.toUpperCase()}\n${S.layers[n] || ''}\n\n`;
+  navigator.clipboard.writeText(txt).then(() => showToast('📋 All layers copied!', 'ok'));
+}
+
+// ─────────────────────────────────────────────
+// UI HELPERS
+// ─────────────────────────────────────────────
+function selectTopic(el) {
+  document.querySelectorAll('.topic').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+  S.topic = el.dataset.topic;
+  S.posA  = el.dataset.pos1;
+  S.posB  = el.dataset.pos2;
+  document.getElementById('custom-topic-in').value  = S.topic;
+  document.getElementById('custom-pos1-in').value   = S.posA;
+  document.getElementById('custom-pos2-in').value   = S.posB;
+  S.position = S.posA;
+  document.getElementById('side-a-btn').classList.add('sel');
+  document.getElementById('side-b-btn').classList.remove('sel');
+}
+
+function updateCustomTopic() {
+  S.topic = document.getElementById('custom-topic-in').value.trim();
+  S.posA  = document.getElementById('custom-pos1-in').value.trim();
+  S.posB  = document.getElementById('custom-pos2-in').value.trim();
+  // Deselect all preset cards when user types their own topic
+  document.querySelectorAll('.topic').forEach(t => t.classList.remove('sel'));
+  // Keep whichever side was selected
+  S.position = document.getElementById('side-a-btn').classList.contains('sel') ? S.posA : S.posB;
+}
+
+function selectPos(which) {
+  S.position = which === 'a' ? S.posA : S.posB;
+  document.getElementById('side-a-btn').classList.toggle('sel', which === 'a');
+  document.getElementById('side-b-btn').classList.toggle('sel', which === 'b');
+}
+
+function selectTone(el) {
+  document.querySelectorAll('.tone-chip').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+  S.tone = el.dataset.tone;
+}
+
+function selectSrc(el) {
+  document.querySelectorAll('.src-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  S.source = el.dataset.src;
+  document.getElementById('src-badge').textContent = el.querySelector('.sn').textContent;
+}
+
+function toggleAcc(hd) {
+  const body = hd.nextElementSibling;
+  const ch = hd.querySelector('.acc-ch');
+  hd.classList.toggle('open');
+  body.classList.toggle('open');
+  ch.classList.toggle('open');
+}
+
+function saveElKey() {
+  const k = document.getElementById('el-key-in').value.trim();
+  S.elKey = k;
+  localStorage.setItem('piq_el', k);
+  document.getElementById('voice-badge').textContent = k ? 'ElevenLabs ✓' : 'Browser TTS';
+  document.getElementById('voice-badge').className = k ? 'acc-badge badge-ok' : 'acc-badge badge-warn';
+  showToast(k ? '🔊 ElevenLabs key saved' : '🔊 Using browser TTS', 'ok');
+}
+
+function showSection(id) {
+  const el = document.getElementById(id + '-section');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.className = `toast show ${type}`;
+  t.textContent = msg;
+  clearTimeout(t._to);
+  t._to = setTimeout(() => { t.className = 'toast'; }, 3200);
+}
+
+// ─────────────────────────────────────────────
+// PARTICLES CANVAS
+// ─────────────────────────────────────────────
+function initParticles() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let pts = [];
+
+  function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+  resize();
+  addEventListener('resize', resize);
+
+  for (let i = 0; i < 70; i++) {
+    pts.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: Math.random() * 1.5 + .4, vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25, a: Math.random() * .4 + .08 });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(14,165,233,${p.a})`; ctx.fill();
+    });
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < 110) {
+          ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.strokeStyle = `rgba(14,165,233,${.04 * (1 - d/110)})`; ctx.lineWidth = .6; ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initParticles();
+  renderHistory();
+
+  // Pre-fill topic and position inputs with defaults
+  document.getElementById('custom-topic-in').value = S.topic;
+  document.getElementById('custom-pos1-in').value  = S.posA;
+  document.getElementById('custom-pos2-in').value  = S.posB;
+
+  if (S.elKey) {
+    document.getElementById('el-key-in').value = S.elKey;
+    document.getElementById('voice-badge').textContent = 'ElevenLabs ✓';
+    document.getElementById('voice-badge').className = 'acc-badge badge-ok';
+  }
+
+  // Model / word count / persona sync
+  document.getElementById('model-sel').addEventListener('change', e => S.model = e.target.value);
+  document.getElementById('wc-sel').addEventListener('change', e => S.wordCount = e.target.value);
+  document.getElementById('persona-sel').addEventListener('change', e => S.persona = e.target.value);
+});
+</script>
+</body>
+</html>
