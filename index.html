@@ -1027,7 +1027,6 @@ function setProgress(pct) {
 // ─────────────────────────────────────────────
 async function runDebate() {
   if (S.running) return;
-  if (!S.apiKey) { showToast('⚠️ Set your Anthropic API key first', 'err'); return; }
 
   S.running = true;
   S.layers = {};
@@ -1375,7 +1374,6 @@ function hidePlayerBar() { document.getElementById('player-bar').classList.remov
 // LIVE DEBATE
 // ─────────────────────────────────────────────
 async function startLiveDebate() {
-  if (!S.apiKey) { showToast('⚠️ Set your API key first', 'err'); return; }
   S.liveActive = true;
   S.liveHistory = [];
   S.liveRounds = 0;
